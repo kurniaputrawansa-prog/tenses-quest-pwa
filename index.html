@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Tenses Quest — Mobile PWA (Upgraded)</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<style>
+:root{
+  --bg:#0f172a; --card:#0b1220; --muted:#94a3b8; --accent:#7c3aed; --accent-2:#06b6d4; --text:#e6eef8;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+body{background:linear-gradient(180deg,#071029 0%, #071a2b 60%);color:var(--text);display:flex;align-items:center;justify-content:center;padding:18px;}
+.app{width:100%;max-width:420px;height:100vh;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+.header{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.02)}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 18px rgba(124,58,237,0.18)}
+.title{font-size:16px;font-weight:700}
+.body{padding:14px;flex:1;overflow:auto}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.02)}
+.buttons{display:flex;gap:8px;margin-top:8px}
+.btn{flex:1;padding:10px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(124,58,237,0.18)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);box-shadow:none}
+.small{font-size:13px;color:var(--muted)}
+.center{display:flex;align-items:center;justify-content:center}
+.progress{height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden;margin-top:10px}
+.progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.option{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);cursor:pointer;font-weight:600}
+.option.correct{background:linear-gradient(180deg, rgba(34,197,94,0.15), rgba(34,197,94,0.08));border-color:rgba(34,197,94,0.3)}
+.option.wrong{background:linear-gradient(180deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06));border-color:rgba(239,68,68,0.28)}
+.footer{padding:12px;border-top:1px solid rgba(255,255,255,0.02);display:flex;gap:8px;align-items:center}
+.leaderboard{max-height:200px;overflow:auto}
+.switch{display:inline-flex;align-items:center;gap:8px}
+.icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:10px;color:var(--text);cursor:pointer}
+.hidden{display:none}
+.result-score{font-size:38px;font-weight:800;color:var(--accent)}
+.install-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:10px 14px;border-radius:12px;color:white;box-shadow:0 10px 30px rgba(2,6,23,0.6);display:flex;gap:10px;align-items:center}
+@media (max-width:420px){ .app{border-radius:0;height:100vh} }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="header">
+    <div class="logo">TQ</div>
+    <div>
+      <div class="title">Tenses Quest</div>
+      <div class="small">Practice tenses — PWA upgrade</div>
+    </div>
+    <div style="margin-left:auto" id="darkToggleWrap">
+      <button id="themeBtn" class="icon-btn" title="Toggle theme">🌓</button>
+    </div>
+  </div>
+
+  <div class="body" id="mainBody">
+    <!-- Start Card -->
+    <div class="card" id="startCard">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-weight:800">Ready to practice?</div>
+          <div class="small">20 questions per round • 3 levels • offline-ready</div>
+        </div>
+        <div class="center" style="gap:8px">
+          <select id="levelSelect" style="padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)">
+            <option>Easy</option><option selected>Medium</option><option>Hard</option>
+          </select>
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="startBtn" class="btn">Start</button>
+        <button id="howBtn" class="btn ghost">How</button>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <label class="small">Timer</label>
+        <input id="timeInput" type="number" value="30" min="5" max="120" style="width:80px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)"/>
+        <label style="margin-left:8px"><input id="useTimer" type="checkbox" checked/> enable</label>
+      </div>
+    </div>
+
+    <!-- Quiz Card -->
+    <div class="card hidden" id="quizCard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="small" id="qCount">Question 1/20</div>
+          <div id="qText" style="font-weight:800;margin-top:6px">...</div>
+        </div>
+        <div style="text-align:right">
+          <div class="small">Score</div>
+          <div id="scoreText" style="font-weight:800">0</div>
+        </div>
+      </div>
+
+      <div class="progress"><i id="progFill"></i></div>
+
+      <div class="options" id="optionsArea"></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button id="nextBtn" class="btn ghost">Skip</button>
+        <button id="submitBtn" class="btn">Submit</button>
+        <button id="endBtn" class="btn ghost" style="margin-left:auto">End</button>
+      </div>
+    </div>
+
+    <!-- Result Card -->
+    <div class="card hidden" id="resultCard">
+      <div style="text-align:center">
+        <div class="small">Round complete</div>
+        <div class="result-score" id="finalScore">0 / 20</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+          <button id="saveBtn" class="btn">Save Score</button>
+          <button id="reviewBtn" class="btn ghost">Review</button>
+          <button id="menuBtn" class="btn ghost">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Card -->
+    <div class="card" id="lbCard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Leaderboard</div>
+        <div><button id="clearLb" class="btn ghost">Clear</button></div>
+      </div>
+      <div id="lbList" class="leaderboard" style="margin-top:10px"></div>
+    </div>
+
+    <!-- Review Card -->
+    <div class="card hidden" id="reviewCard">
+      <div style="font-weight:800">Review</div>
+      <div id="reviewList" style="margin-top:8px;max-height:280px;overflow:auto"></div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="reviewBack" class="btn ghost">Back</button>
+        <button id="downloadCsv" class="btn">Download CSV</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer" style="padding:12px 14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-top:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;gap:8px">
+    <div class="small">Tenses Quest • PWA</div>
+    <div style="margin-left:auto">
+      <button id="installBtn" class="btn ghost hidden">Install</button>
+    </div>
+  </div>
+</div>
+
+<div id="installBanner" class="install-banner hidden">
+  <div>Install Tenses Quest</div>
+  <button id="doInstall" class="btn">Install</button>
+</div>
+
+<canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:120;display:none"></canvas>
+
+<script>
+/* ===== Question generation (100) ===== */
+const baseTemplates = [
+  {q:'___ to the market every Sunday.', opts:['go','goes','going','gone'], ans:2, expl:'Habit → Simple Present.'},
+  {q:'I ___ my homework now.', opts:['do','did','am doing','have done'], ans:3, expl:'Now → Present Continuous.'},
+  {q:'They ___ football yesterday.', opts:['play','played','are playing','have played'], ans:2, expl:'Yesterday → Simple Past.'},
+  {q:'My mother ___ dinner when I arrived.', opts:['cooks','was cooking','cooked','has cooked'], ans:2, expl:'Past Continuous.'},
+  {q:'He ___ in this company since 2010.', opts:['worked','has worked','is working','works'], ans:2, expl:'Present Perfect.'},
+  {q:'When I got to the station, the train ___.', opts:['left','has left','had left','was leaving'], ans:3, expl:'Past Perfect.'},
+  {q:'By next year, she ___ her degree.', opts:['finishes','will have finished','will finish','has finished'], ans:2, expl:'Future Perfect.'},
+  {q:'The children ___ in the park when it started to rain.', opts:['play','played','were playing','have played'], ans:3, expl:'Past Continuous.'},
+  {q:'If I ___ more time, I would help you.', opts:['have','had','will have','have had'], ans:2, expl:'2nd conditional.'},
+  {q:'She said she ___ busy the next day.', opts:['is','was','will be','has been'], ans:2, expl:'Reported speech.'}
+];
+
+function genPool(){
+  const times = ['every Sunday','every weekend','last week','yesterday','at the moment','now','this morning','tonight'];
+  const subs = ['She','He','They','My friend','The students','Our team','Her brother','His sister','My parents','The manager'];
+  const out=[];
+  let i=0;
+  while(out.length<100){
+    const base = baseTemplates[i % baseTemplates.length];
+    const q = JSON.parse(JSON.stringify(base));
+    if(q.q.startsWith('___')) q.q = subs[i % subs.length] + ' ' + q.q.slice(3);
+    q.q = q.q.replace('every Sunday', times[i%times.length]);
+    q.q = q.q.replace('yesterday', times[i%times.length]);
+    q.q = q.q.replace('now', times[i%times.length]);
+    out.push(Object.assign({}, q, {id: out.length+1}));
+    i++;
+  }
+  return out;
+}
+const POOL = genPool();
+
+/* ===== App State ===== */
+let STATE = {
+  level: 'Medium',
+  perTime: 30,
+  useTimer: true,
+  round: [],
+  current: 0,
+  score: 0,
+  history: []
+};
+
+const el = id => document.getElementById(id);
+const startCard = el('startCard'), quizCard = el('quizCard'), resultCard = el('resultCard'),
+      lbCard = el('lbCard'), reviewCard = el('reviewCard');
+
+el('startBtn').addEventListener('click', ()=>{ STATE.level = el('levelSelect').value; STATE.perTime = Number(el('timeInput').value)||30; STATE.useTimer = el('useTimer').checked; startRound(); });
+el('howBtn').addEventListener('click', ()=>alert('20 questions per round. Click an option to answer. Save score to leaderboard.'));
+el('nextBtn').addEventListener('click', ()=>skipQuestion());
+el('submitBtn').addEventListener('click', ()=>submitNoAnswer());
+el('endBtn').addEventListener('click', ()=>endRound());
+el('saveBtn').addEventListener('click', saveScore);
+el('reviewBtn').addEventListener('click', ()=>{ renderReview(); show('review'); });
+el('menuBtn').addEventListener('click', ()=>show('start'));
+el('clearLb').addEventListener('click', ()=>{ if(confirm('Clear leaderboard?')){ localStorage.removeItem('tenses_leaderboard'); renderLb(); } });
+el('reviewBack').addEventListener('click', ()=>show('finish'));
+el('downloadCsv').addEventListener('click', downloadCsv);
+
+/* Install prompt handling */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; el('installBtn').classList.remove('hidden'); });
+el('installBtn').addEventListener('click', async ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; deferredPrompt = null; el('installBtn').classList.add('hidden'); } });
+
+/* Theme toggle */
+el('themeBtn').addEventListener('click', ()=>{ document.body.classList.toggle('light'); if(document.body.classList.contains('light')){ document.documentElement.style.setProperty('--bg','#ffffff'); document.documentElement.style.setProperty('--text','#07203a'); } else { document.documentElement.style.removeProperty('--bg'); document.documentElement.style.removeProperty('--text'); } });
+
+/* ===== Functions ===== */
+function startRound(){
+  STATE.round = shuffle(POOL).slice(0,20);
+  STATE.current = 0; STATE.score = 0; STATE.history = [];
+  el('scoreText').innerText = 0;
+  renderQuestion();
+  show('quiz');
+  if(STATE.useTimer) startTimer();
+}
+
+function renderQuestion(){
+  stopTimer();
+  const q = STATE.round[STATE.current];
+  el('qText').innerText = q.q;
+  el('qCount').innerText = `Question ${STATE.current+1} / ${STATE.round.length}`;
+  el('optionsArea').innerHTML = '';
+  q.opts.forEach((opt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'option';
+    b.innerText = `${String.fromCharCode(65+idx)}. ${opt}`;
+    b.addEventListener('click', ()=>selectOption(idx, b));
+    el('optionsArea').appendChild(b);
+  });
+  updateProgress();
+}
+
+function selectOption(idx, btn){
+  // disable all
+  el('optionsArea').querySelectorAll('button').forEach(b=>b.disabled=true);
+  const q = STATE.round[STATE.current];
+  const correct = q.ans - 1;
+  el('optionsArea').querySelectorAll('button').forEach((b, i)=>{ if(i===correct) b.classList.add('correct'); if(i===idx && i!==correct) b.classList.add('wrong'); });
+  const isCorrect = idx === correct;
+  if(isCorrect){ STATE.score++; el('scoreText').innerText = STATE.score; confettiBurst(); }
+  STATE.history.push({id:q.id, q:q.q, chosen: idx+1, correct:isCorrect, correctAns: q.ans, explanation: q.expl});
+  stopTimer();
+  setTimeout(()=>{ nextQuestion(); },700);
+}
+
+function submitNoAnswer(){
+  const q = STATE.round[STATE.current];
+  STATE.history.push({id:q.id, q:q.q, chosen:null, correct:false, correctAns:q.ans, explanation:q.expl});
+  stopTimer(); nextQuestion();
+}
+function skipQuestion(){ submitNoAnswer(); }
+function nextQuestion(){
+  STATE.current++;
+  if(STATE.current >= STATE.round.length){ endRound(); } else { renderQuestion(); if(STATE.useTimer) startTimer(); }
+}
+function endRound(){ stopTimer(); el('finalScore').innerText = `${STATE.score} / ${STATE.round.length}`; show('finish'); }
+function show(which){
+  // hide all main cards
+  [startCard, quizCard, resultCard, lbCard, reviewCard].forEach(c=>c.classList.add('hidden'));
+  if(which==='start') startCard.classList.remove('hidden');
+  if(which==='quiz') quizCard.classList.remove('hidden');
+  if(which==='finish') resultCard.classList.remove('hidden');
+  if(which==='lb') lbCard.classList.remove('hidden');
+  if(which==='review') reviewCard.classList.remove('hidden');
+}
+
+/* Progress bar */
+function updateProgress(){
+  const pct = Math.round((STATE.current / STATE.round.length) * 100);
+  el('progFill').style.width = pct + '%';
+}
+
+/* Timer */
+let timerHandle = null;
+function startTimer(){
+  stopTimer();
+  if(!STATE.perTime || STATE.perTime<=0) return;
+  let t = STATE.perTime;
+  el('timer').innerText = t+'s';
+  timerHandle = setInterval(()=>{ t--; el('timer').innerText = t+'s'; const pct = Math.round(((STATE.perTime - t)/STATE.perTime)*100); el('progFill').style.width = pct + '%'; if(t<=0){ clearInterval(timerHandle); submitNoAnswer(); } },1000);
+}
+function stopTimer(){ if(timerHandle) clearInterval(timerHandle); }
+
+/* Leaderboard */
+function saveScore(){
+  const name = prompt('Enter name to save score (leave blank to cancel):');
+  if(!name) return;
+  const lb = JSON.parse(localStorage.getItem('tenses_leaderboard')||'[]');
+  lb.push({name, score: STATE.score, when: new Date().toISOString()});
+  lb.sort((a,b)=>b.score-a.score);
+  localStorage.setItem('tenses_leaderboard', JSON.stringify(lb.slice(0,10)));
+  renderLb();
+  alert('Score saved!');
+}
+function renderLb(){
+  const lb = JSON.parse(localStorage.getItem('tenses_leaderboard')||'[]');
+  const list = el('lbList'); list.innerHTML='';
+  if(lb.length===0){ list.innerHTML='<div class="small">No scores yet.</div>'; return;}
+  lb.forEach((e,idx)=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.padding='8px'; row.style.borderRadius='8px'; row.style.background='rgba(255,255,255,0.02)'; row.style.marginBottom='6px'; row.innerHTML=`<div>${idx+1}. ${e.name}</div><div class="small">${e.score}</div>`; list.appendChild(row); });
+}
+renderLb();
+
+/* Review */
+function renderReview(){
+  const list = el('reviewList'); list.innerHTML='';
+  STATE.history.forEach((h, idx)=>{ const div=document.createElement('div'); div.className='card'; div.innerHTML = `<div style="font-weight:700">${idx+1}. ${h.q}</div><div class="small">Your: ${h.chosen? (String.fromCharCode(64+h.chosen)+'.') : 'No answer'} — Correct: ${String.fromCharCode(64+h.correctAns)}. ${STATE.round[0] && STATE.round[0].opts? STATE.round[0].opts[h.correctAns-1] : ''}</div><div class="small">${h.explanation}</div>`; list.appendChild(div); });
+}
+
+/* CSV download */
+function downloadCsv(){
+  const rows = ['No,Question,Your Answer,Correct Answer,Explanation'];
+  STATE.history.forEach((h,i)=>{ const q=`"${h.q.replace(/"/g,'""')}"`; const your = h.chosen? (STATE.round[0] && STATE.round[0].opts? STATE.round[0].opts[h.chosen-1] : '') : 'No answer'; const corr = STATE.round[0] && STATE.round[0].opts? STATE.round[0].opts[h.correctAns-1] : ''; rows.push([i+1,q,your,corr,h.explanation].join(',')); });
+  const blob = new Blob([rows.join('\n')], {type: 'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='tenses_round_results.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+/* Utilities */
+function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
+
+/* Confetti simple */
+function confettiBurst(){
+  const c = el('confetti'); if(!c) return;
+  c.style.display='block'; const ctx=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight; const pieces=[]; for(let i=0;i<40;i++){ pieces.push({x:Math.random()*c.width,y:-Math.random()*c.height,r:Math.random()*6+4, c:`hsl(${Math.random()*360},80%,60%)`, vx:(Math.random()-0.5)*2, vy:Math.random()*3+2, rot:Math.random()*360}); } let t=0; function step(){ t++; ctx.clearRect(0,0,c.width,c.height); pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx.restore(); }); if(t<120) requestAnimationFrame(step); else { ctx.clearRect(0,0,c.width,c.height); c.style.display='none'; } } requestAnimationFrame(step);
+}
+
+/* Install prompt UI */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; el('installBtn').classList.remove('hidden'); el('installBanner').classList.remove('hidden'); });
+el('doInstall').addEventListener('click', async ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; if(choice.outcome==='accepted'){ console.log('User accepted install'); } deferredPrompt = null; el('installBtn').classList.add('hidden'); el('installBanner').classList.add('hidden'); } });
+
+/* initial show */
+show('start');
+</script>
+</body>
+</html>
